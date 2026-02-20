@@ -34,7 +34,6 @@ const paymentSchema = new Schema<IPayment, PaymentModel>(
     transactionId: {
       type: String,
       trim: true,
-      sparse: true,
     },
     providerResponse: {
       type: Schema.Types.Mixed,
@@ -49,7 +48,7 @@ const paymentSchema = new Schema<IPayment, PaymentModel>(
 );
 
 // Indexes
-paymentSchema.index({ orderId: 1 }, { unique: true });
+// `orderId` already has `unique: true` at field level, so no extra index declaration needed.
 paymentSchema.index({ userId: 1 });
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ transactionId: 1 }, { sparse: true });

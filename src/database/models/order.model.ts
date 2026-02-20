@@ -109,7 +109,6 @@ const orderSchema = new Schema<IOrder, OrderModel>(
 
 // Indexes
 orderSchema.index({ userId: 1, createdAt: -1 });
-orderSchema.index({ status: 1 });
 orderSchema.index({ darkStoreId: 1 });
 orderSchema.index({ deliveryPartnerId: 1 });
 orderSchema.index({ 'deliveryLocation.coordinates': '2dsphere' });
