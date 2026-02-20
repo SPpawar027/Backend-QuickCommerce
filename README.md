@@ -173,7 +173,7 @@ PORT=3000
 NODE_ENV=development
 
 # Database
-MONGO_URI=mongodb://localhost:27017/quick-delivery
+MONGO_URI=mongodb+srv://<username>:<url-encoded-password>@<cluster-host>/<database>?retryWrites=true&w=majority
 
 # JWT Configuration
 JWT_ACCESS_SECRET=your-super-secret-access-key-min-32-chars
