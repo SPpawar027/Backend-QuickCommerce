@@ -36,8 +36,8 @@ coverage/
 .eslintcache
 .prettier-cache
 
-# Local uploads / generated media
-uploads/
+# Local uploads / generated media (runtime)
+/uploads/
 
 # Docker overrides / local compose files
 docker-compose.override.yml
