@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../../common/types';
 import { orderService } from './order.service';
-import { asyncWrapper, sendSuccess, sendNoContent, sendCreated } from '../../common/utils';
+import { asyncWrapper, sendSuccess, sendCreated } from '../../common/utils';
 import {
   CreateOrderInput,
   UpdateOrderStatusInput,

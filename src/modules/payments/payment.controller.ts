@@ -8,7 +8,6 @@ import {
   GetPaymentParams,
   GetPaymentByOrderParams,
   ListPaymentsQuery,
-  WebhookInput,
 } from './payment.schema';
 import { getPaginationOptions } from '../../common/utils/pagination';
 

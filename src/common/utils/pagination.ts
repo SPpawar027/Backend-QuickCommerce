@@ -1,4 +1,5 @@
 import { PaginationResult } from '../types';
+export type { PaginationResult } from '../types';
 
 export interface PaginationOptions {
   page: number;

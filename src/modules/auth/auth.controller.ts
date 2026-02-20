@@ -14,16 +14,6 @@ const REFRESH_TOKEN_COOKIE_OPTIONS = {
   path: '/api/v1/auth',
 };
 
-// Cookie options for access token (optional, can use Authorization header)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ACCESS_TOKEN_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
-  maxAge: 15 * 60 * 1000, // 15 minutes
-  path: '/',
-};
-
 export class AuthController {
   register = asyncWrapper(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const input = req.body as RegisterInput;

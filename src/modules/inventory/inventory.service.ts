@@ -79,7 +79,7 @@ export class InventoryService {
     return updated;
   }
 
-  async adjustStock(id: string, quantityChange: number, reason: string): Promise<IInventory> {
+  async adjustStock(id: string, quantityChange: number, _reason: string): Promise<IInventory> {
     // Check if inventory exists
     const existing = await inventoryRepository.findById(id);
     if (!existing) {

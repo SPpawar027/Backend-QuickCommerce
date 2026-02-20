@@ -1,6 +1,6 @@
-import mongoose, { ClientSession } from 'mongoose';
+import mongoose from 'mongoose';
 import { AppError } from '../../common/errors';
-import { IOrder, IOrderItem, OrderStatus, IUser } from '../../common/types';
+import { IOrder, IOrderItem, OrderStatus } from '../../common/types';
 import { orderRepository, CreateOrderData, UpdateOrderData, OrderFilters } from './order.repository';
 import { productRepository } from '../products/product.repository';
 import { darkStoreRepository } from '../dark-stores/dark-store.repository';

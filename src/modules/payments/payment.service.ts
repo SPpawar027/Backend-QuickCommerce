@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from 'mongoose';
+import mongoose from 'mongoose';
 import crypto from 'crypto';
 import { AppError } from '../../common/errors';
 import { IPayment, PaymentStatus, PaymentMethod } from '../../common/types';
