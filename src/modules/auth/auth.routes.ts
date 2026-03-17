@@ -3,7 +3,13 @@ import { authController } from './auth.controller';
 import { validateBody } from '../../common/middleware';
 import { authRateLimiter } from '../../common/middleware/rate-limiter';
 import { authenticate } from '../users/users.middleware';
-import { registerSchema, loginSchema, changePasswordSchema } from './auth.schema';
+import {
+  registerSchema,
+  loginSchema,
+  firebaseLoginSchema,
+  firebaseRegisterSchema,
+  changePasswordSchema,
+} from './auth.schema';
 
 const router = Router();
 
@@ -15,6 +21,18 @@ router.post(
   authController.register
 );
 router.post('/login', authRateLimiter, validateBody(loginSchema.shape.body), authController.login);
+router.post(
+  '/firebase-register',
+  authRateLimiter,
+  validateBody(firebaseRegisterSchema.shape.body),
+  authController.firebaseRegister
+);
+router.post(
+  '/firebase-login',
+  authRateLimiter,
+  validateBody(firebaseLoginSchema.shape.body),
+  authController.firebaseLogin
+);
 router.post('/refresh-token', authController.refreshToken);
 
 // Protected routes

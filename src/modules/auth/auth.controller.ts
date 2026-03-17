@@ -2,7 +2,13 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../../common/types';
 import { authService } from './auth.service';
 import { asyncWrapper, sendSuccess, sendNoContent } from '../../common/utils';
-import { RegisterInput, LoginInput, ChangePasswordInput } from './auth.schema';
+import {
+  RegisterInput,
+  LoginInput,
+  ChangePasswordInput,
+  FirebaseLoginInput,
+  FirebaseRegisterInput,
+} from './auth.schema';
 import { env } from '../../config/env';
 
 // Cookie options for refresh token
@@ -48,6 +54,42 @@ export class AuthController {
       },
       200,
       'Login successful'
+    );
+  });
+
+  firebaseRegister = asyncWrapper(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { idToken } = req.body as FirebaseRegisterInput;
+    const result = await authService.registerWithFirebaseIdToken(idToken);
+
+    // Set refresh token in HTTP-only cookie
+    res.cookie('refreshToken', result.tokens.refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
+
+    sendSuccess(
+      res,
+      {
+        user: result.user,
+        accessToken: result.tokens.accessToken,
+      },
+      201,
+      'Firebase registration successful'
+    );
+  });
+
+  firebaseLogin = asyncWrapper(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { idToken } = req.body as FirebaseLoginInput;
+    const result = await authService.loginWithFirebaseIdToken(idToken);
+
+    // Set refresh token in HTTP-only cookie
+    res.cookie('refreshToken', result.tokens.refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
+
+    sendSuccess(
+      res,
+      {
+        user: result.user,
+        accessToken: result.tokens.accessToken,
+      },
+      200,
+      'Firebase login successful'
     );
   });
 

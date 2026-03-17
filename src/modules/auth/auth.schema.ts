@@ -22,6 +22,18 @@ export const loginSchema = z.object({
   }),
 });
 
+export const firebaseLoginSchema = z.object({
+  body: z.object({
+    idToken: z.string().min(1, 'Firebase ID token is required'),
+  }),
+});
+
+export const firebaseRegisterSchema = z.object({
+  body: z.object({
+    idToken: z.string().min(1, 'Firebase ID token is required'),
+  }),
+});
+
 export const refreshTokenSchema = z.object({
   cookies: z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
@@ -37,5 +49,7 @@ export const changePasswordSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>['body'];
 export type LoginInput = z.infer<typeof loginSchema>['body'];
+export type FirebaseLoginInput = z.infer<typeof firebaseLoginSchema>['body'];
+export type FirebaseRegisterInput = z.infer<typeof firebaseRegisterSchema>['body'];
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>['cookies'];
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>['body'];

@@ -1,9 +1,11 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { env } from '../../config/env';
 import { AppError } from '../../common/errors';
 import { authRepository, CreateUserData } from './auth.repository';
-import { IUser, TokenPayload } from '../../common/types';
+import { IUser, TokenPayload, UserRole } from '../../common/types';
+import { verifyFirebaseIdToken } from '../../config/firebase';
 
 export interface AuthTokens {
   accessToken: string;
@@ -13,6 +15,12 @@ export interface AuthTokens {
 export interface AuthResponse {
   user: Omit<IUser, 'password' | 'refreshTokenHash'>;
   tokens: AuthTokens;
+}
+
+interface FirebaseUserProfile {
+  email: string;
+  name: string;
+  phone?: string;
 }
 
 export class AuthService {
@@ -44,11 +52,37 @@ export class AuthService {
   }
 
   private sanitizeUser(user: IUser): Omit<IUser, 'password' | 'refreshTokenHash'> {
-    const { password: _password, refreshTokenHash: _refresh, ...sanitized } = user as IUser & {
+    const {
+      password: _password,
+      refreshTokenHash: _refresh,
+      ...sanitized
+    } = user as IUser & {
       password?: string;
       refreshTokenHash?: string;
     };
     return sanitized;
+  }
+
+  private async extractVerifiedFirebaseProfile(idToken: string): Promise<FirebaseUserProfile> {
+    const decoded = await verifyFirebaseIdToken(idToken);
+    const email = decoded.email?.toLowerCase().trim();
+
+    if (!email) {
+      throw AppError.badRequest('Firebase token does not include an email', 'FIREBASE_EMAIL_MISSING');
+    }
+
+    if (!decoded.email_verified) {
+      throw AppError.unauthorized('Firebase email is not verified', 'FIREBASE_EMAIL_NOT_VERIFIED');
+    }
+
+    const displayName = decoded.name?.trim();
+    const fallbackName = email.split('@')[0];
+
+    return {
+      email,
+      name: displayName || fallbackName || 'User',
+      phone: typeof decoded.phone_number === 'string' ? decoded.phone_number : undefined,
+    };
   }
 
   async register(data: CreateUserData): Promise<AuthResponse> {
@@ -97,6 +131,59 @@ export class AuthService {
     const tokens = this.generateTokens(payload);
 
     // Store refresh token hash
+    await authRepository.updateRefreshToken(user._id, tokens.refreshToken);
+
+    return {
+      user: this.sanitizeUser(user),
+      tokens,
+    };
+  }
+
+  async loginWithFirebaseIdToken(idToken: string): Promise<AuthResponse> {
+    const profile = await this.extractVerifiedFirebaseProfile(idToken);
+    const user = await authRepository.findByEmail(profile.email);
+
+    if (!user) {
+      throw AppError.notFound(
+        'User not registered. Complete Firebase registration first.',
+        'USER_NOT_REGISTERED'
+      );
+    }
+
+    if (!user.isActive) {
+      throw AppError.forbidden('Account is deactivated', 'ACCOUNT_DEACTIVATED');
+    }
+
+    const payload = this.createTokenPayload(user);
+    const tokens = this.generateTokens(payload);
+    await authRepository.updateRefreshToken(user._id, tokens.refreshToken);
+
+    return {
+      user: this.sanitizeUser(user),
+      tokens,
+    };
+  }
+
+  async registerWithFirebaseIdToken(idToken: string): Promise<AuthResponse> {
+    const profile = await this.extractVerifiedFirebaseProfile(idToken);
+    const existingUser = await authRepository.findByEmail(profile.email);
+
+    if (existingUser) {
+      throw AppError.conflict('User with this email already exists', 'USER_EXISTS');
+    }
+
+    const randomPassword = crypto.randomBytes(48).toString('hex');
+    const createUserData: CreateUserData = {
+      email: profile.email,
+      name: profile.name,
+      password: randomPassword,
+      role: UserRole.CUSTOMER,
+      phone: profile.phone,
+    };
+
+    const user = await authRepository.create(createUserData);
+    const payload = this.createTokenPayload(user);
+    const tokens = this.generateTokens(payload);
     await authRepository.updateRefreshToken(user._id, tokens.refreshToken);
 
     return {

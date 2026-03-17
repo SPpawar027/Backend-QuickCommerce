@@ -12,21 +12,21 @@ import { sendSuccess } from './common/utils/response-formatter';
 
 const app: Application = express();
 
-// Security middleware
-app.use(helmet());
-
 // CORS configuration
 app.use(
   cors({
     origin:
       env.NODE_ENV === 'production'
         ? (process.env.ALLOWED_ORIGINS?.split(',') ?? [])
-        : env.FRONTEND_URL,
+        : [env.FRONTEND_URL, 'http://localhost:5173'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
   })
 );
+
+// Security middleware
+app.use(helmet());
 
 // Compression middleware
 app.use(compression());
